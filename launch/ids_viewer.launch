@@ -1,0 +1,9 @@
+<launch>
+
+	<arg name="yamlFile" default="$(find ids_viewer)/conf/config.yaml"/>
+
+    	<rosparam command="load" file="$(arg yamlFile)"/>
+
+	<node name="ids_viewer_node" pkg="ids_viewer" type="ids_viewer_node" respawn="true" output="screen" />
+    
+</launch>
