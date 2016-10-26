@@ -2,6 +2,16 @@
 
 using namespace ids;
 
+/// ----------------------------------------------------> Time manager <----------------------------------------------------
+
+// double diff_ms(const timeval t1, const timeval t2)
+// { 
+
+// 	return ((t1.tv_usec + (t1.tv_sec - t2.tv_sec) * 1000000) - t2.tv_usec) / 1000;
+// }
+
+/// -------------------------------------------------------------------------------------------------------------------------------------
+
 ids_camera::ids_camera(const HIDS id, const int fps, const bool verbose){
 
 	hCam_ = id;
@@ -38,6 +48,7 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 
 	// Initialize vars
 	is_terminate_ = false;
+	recON_ = false;
 
 
 	if (!init()){
@@ -396,6 +407,8 @@ bool ids_camera::recOFF(){
 
 }
 
+
+
 void ids_camera::spin(){
 
 	ROS_INFO("Start spin()");
@@ -404,10 +417,31 @@ void ids_camera::spin(){
 
 	Mat frame;
 
+	/// ----------------------------------------------------> Time manager <----------------------------------------------------
+
+	// struct timeval time_after, time_before;
+
+    	// // Get current time  
+    	// gettimeofday(&time_after, NULL);
+    	// time_before = time_after;
+
+	/// -------------------------------------------------------------------------------------------------------------------------------------
+
+
 	while(ros::ok()){
 
-		frame = get_frame();
+		/// ----------------------------------------------------> Time manager <----------------------------------------------------
 
+		// gettimeofday(&time_after, NULL);
+
+		// cout << "Time: " << diff_ms(time_after, time_before) << endl;
+
+		// time_before = time_after;
+
+		/// -------------------------------------------------------------------------------------------------------------------------------------
+
+		frame = get_frame();
+		
 		// Generate message from image
 
 		sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
@@ -423,5 +457,6 @@ void ids_camera::spin(){
 		// Wait
 		r.sleep();
 	}
-
 }
+
+
