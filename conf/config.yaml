@@ -1,4 +1,7 @@
 ids/camera_id: 1
 ids/fps: 15 # IDS-XS reaches at maximum 15 FPS
+ids/width: 1280
+ids/heigth: 720
+ids/bpp: 24
 ids/verbose: true
 ids/rec_name: "" # let this field empty to disable the recording, please insert absolute address -- /home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec.avi

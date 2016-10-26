@@ -43,6 +43,9 @@ ids_camera::ids_camera(ros::NodeHandle* n){
    	hCam_ = (HIDS) hCam_;
 
 	n_->param("/ids/fps", fps_, 15);
+	n_->param("/ids/width", width_, CAM_VIDEO_WIDTH);
+	n_->param("/ids/heigth", heigth_, CAM_VIDEO_HEIGHT);
+	n_->param("/ids/bpp", bpp_, CAM_VIDEO_BPP);
 	n_->param("/ids/verbose", verbose_, true);
 	n_->param<std::string>("/ids/rec_name", rec, "");
 
@@ -100,7 +103,7 @@ bool ids_camera::init(){
 	char* imgMem;
 	int memId;
 
-	if (is_AllocImageMem(hCam_, CAM_VIDEO_WIDTH, CAM_VIDEO_HEIGHT, CAM_VIDEO_BPP, &imgMem, &memId) != IS_SUCCESS)
+	if (is_AllocImageMem(hCam_, width_, heigth_, bpp_, &imgMem, &memId) != IS_SUCCESS)
 		return false;
 	else{
 		if (verbose_)
@@ -140,7 +143,7 @@ bool ids_camera::init(){
 	if (verbose_)
 		cout << "- Set Image Size --> ";
 
-	if (is_SetImageSize (hCam_, CAM_VIDEO_WIDTH, CAM_VIDEO_HEIGHT) != IS_SUCCESS)
+	if (is_SetImageSize (hCam_, width_, heigth_) != IS_SUCCESS)
 		return false;
 	else{
 		if (verbose_)
@@ -322,7 +325,7 @@ Mat ids_camera::get_frame(){
 	//pointer to where the image is stored
 	uchar* pMemVoid; 
 
-	Mat frame(CAM_VIDEO_HEIGHT, CAM_VIDEO_WIDTH, CV_8UC3);
+	Mat frame(heigth_, width_, CV_8UC3);
 
 	// Check if camera is alive
 
@@ -340,7 +343,7 @@ Mat ids_camera::get_frame(){
 
 	// Copy img in Mat structure
 
-	for (int i = CAM_VIDEO_WIDTH * CAM_VIDEO_HEIGHT * 3; i--; )
+	for (int i = width_ * heigth_ * 3; i--; )
 		x[i] = (uchar) pMemVoid[i];
 
 	if (recON_)
@@ -388,7 +391,7 @@ bool ids_camera::recON(const std::string str){
 	
 	// Open videostr.c_str()
 
-	outVid_.open(str.c_str(), ex, 15.0, Size( CAM_VIDEO_WIDTH, CAM_VIDEO_HEIGHT ), true);
+	outVid_.open(str.c_str(), ex, 15.0, Size( width_, heigth_ ), true);
 
 	if (outVid_.isOpened()) {
 		recON_ = true;

@@ -66,6 +66,7 @@ namespace ids {
 
 		HIDS hCam_;
 		int fps_;
+		int width_, heigth_, bpp_;
 
 		cv::VideoWriter outVid_;
 
