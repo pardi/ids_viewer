@@ -21,6 +21,8 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
+#include <ids_viewer/IDSparams.h>
+
 
 #define CAM_VIDEO_WIDTH 	1280 
 #define CAM_VIDEO_HEIGHT 	720
@@ -64,13 +66,16 @@ namespace ids {
 		// ROS spin function
 		void spin();
 
+		// Serivce
+		bool paramService(ids_viewer::IDSparams::Request&, ids_viewer::IDSparams::Response&);
+
 		// Variables
 
 		bool verbose_;
 
 		HIDS hCam_;
 		int fps_;
-		int width_, heigth_, bpp_;
+		int width_, height_, bpp_;
 
 		cv::VideoWriter outVid_;
 		cv::VideoCapture* off_video_;
@@ -84,6 +89,9 @@ namespace ids {
 		ros::NodeHandle* n_;
 		image_transport::Publisher ids_pub_;
 
+		// service
+
+		ros::ServiceServer param_ser_;
 
 	};
 } 

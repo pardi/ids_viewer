@@ -48,7 +48,7 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 
 	n_->param("/ids/fps", fps_, 15);
 	n_->param("/ids/width", width_, CAM_VIDEO_WIDTH);
-	n_->param("/ids/heigth", heigth_, CAM_VIDEO_HEIGHT);
+	n_->param("/ids/height", height_, CAM_VIDEO_HEIGHT);
 	n_->param("/ids/bpp", bpp_, CAM_VIDEO_BPP);
 	n_->param("/ids/verbose", verbose_, true);
 	n_->param<std::string>("/ids/rec_name", rec, "");
@@ -65,6 +65,13 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 			return;
 		}
 
+		// Get Params 
+		Mat fp;
+		fp = get_frame();
+		
+		width_ = fp.cols;
+		height_ = fp.rows;
+
 	}else{
 
 		if (!init()){
@@ -79,6 +86,11 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 		
 	}
 	
+	// Service
+
+	param_ser_ = n_->advertiseService("ids_viewer/params", &ids_camera::paramService, this);
+
+
 	// Generate image transport element
   	image_transport::ImageTransport it(*n_);
   	ids_pub_ = it.advertise("ids_viewer/image", 1);
@@ -123,7 +135,7 @@ bool ids_camera::init(){
 	char* imgMem;
 	int memId;
 
-	if (is_AllocImageMem(hCam_, width_, heigth_, bpp_, &imgMem, &memId) != IS_SUCCESS)
+	if (is_AllocImageMem(hCam_, width_, height_, bpp_, &imgMem, &memId) != IS_SUCCESS)
 		return false;
 	else{
 		if (verbose_)
@@ -163,7 +175,7 @@ bool ids_camera::init(){
 	if (verbose_)
 		cout << "- Set Image Size --> ";
 
-	if (is_SetImageSize (hCam_, width_, heigth_) != IS_SUCCESS)
+	if (is_SetImageSize (hCam_, width_, height_) != IS_SUCCESS)
 		return false;
 	else{
 		if (verbose_)
@@ -342,7 +354,7 @@ void ids_camera::terminate_on_error(){
 // Get Frame from ids camera
 Mat ids_camera::get_frame(){
 
-	Mat frame(heigth_, width_, CV_8UC3);
+	Mat frame(height_, width_, CV_8UC3);
 
 	if (offline_){
 
@@ -370,7 +382,7 @@ Mat ids_camera::get_frame(){
 
 		// Copy img in Mat structure
 
-		for (int i = width_ * heigth_ * 3; i--; )
+		for (int i = width_ * height_ * 3; i--; )
 			x[i] = (uchar) pMemVoid[i];
 
 		if (recON_)
@@ -439,7 +451,7 @@ bool ids_camera::recON(std::string str){
 	
 	// Open video
 
-	outVid_.open(str.c_str(), ex, 15.0, Size( width_, heigth_ ), true);
+	outVid_.open(str.c_str(), ex, 15.0, Size( width_, height_ ), true);
 
 	if (outVid_.isOpened()) {
 		recON_ = true;
@@ -516,4 +528,10 @@ void ids_camera::spin(){
 	}
 }
 
+bool ids_camera::paramService(ids_viewer::IDSparams::Request  &req, ids_viewer::IDSparams::Response &res){
 
+	res.width = width_;
+	res.height = height_;
+
+	return true;
+}
