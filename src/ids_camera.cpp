@@ -35,8 +35,12 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 	// Store node handle
 	n_ = n;
 
+	// Initialize vars
+	is_terminate_ = false;
+	recON_ = false;
+
 	// Get param
-	std::string rec;
+	std::string rec, off_vid;
 	int hCam;
 
    	n_->param("/ids/id", hCam, 1);
@@ -48,21 +52,32 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 	n_->param("/ids/bpp", bpp_, CAM_VIDEO_BPP);
 	n_->param("/ids/verbose", verbose_, true);
 	n_->param<std::string>("/ids/rec_name", rec, "");
+	n_->param("/ids/offline", offline_, false);
 
-	// Initialize vars
-	is_terminate_ = false;
-	recON_ = false;
+	if (offline_){
 
+		n_->param<std::string>("/ids/offline_name", off_vid, "");
 
-	if (!init()){
-	    terminate_on_error();
-	    return;
+		off_video_ = new VideoCapture(off_vid.c_str()); 
+
+		if(!off_video_->isOpened()){  // check if we succeeded
+			ROS_INFO("Can not open the video");
+			return;
+		}
+
+	}else{
+
+		if (!init()){
+		    terminate_on_error();
+		    return;
+		}
+
+		cameraOn();
+		
+		if (!rec.empty())
+			recON(rec);
+		
 	}
-
-	cameraOn();
-
-	if (!rec.empty())
-		recON(rec);
 	
 	// Generate image transport element
   	image_transport::ImageTransport it(*n_);
@@ -73,10 +88,15 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 
 ids_camera::~ids_camera(){
 
-	if (verbose_)
-		cout << "Closing IDS camera" << endl;
+	if (offline_)
+		delete off_video_;
+	else{
 
-	is_ExitCamera(hCam_);
+		if (verbose_)
+			cout << "Closing IDS camera" << endl;
+
+		is_ExitCamera(hCam_);
+	}
 }
 
 bool ids_camera::init(){
@@ -322,35 +342,42 @@ void ids_camera::terminate_on_error(){
 // Get Frame from ids camera
 Mat ids_camera::get_frame(){
 
-	//pointer to where the image is stored
-	uchar* pMemVoid; 
-
 	Mat frame(heigth_, width_, CV_8UC3);
 
-	// Check if camera is alive
+	if (offline_){
 
-	if (is_terminate_)
+		VideoCapture capture = *off_video_ ;
+		capture >> frame;
+
+	}else{
+
+		//pointer to where the image is stored
+		uchar* pMemVoid; 
+
+		// Check if camera is alive
+
+		if (is_terminate_)
+			return frame;
+		
+		// Pointer on matrix
+		uchar* x = frame.ptr();
+
+		// Get Image from camera
+		if ( is_GetImageMem (hCam_, (void**) &pMemVoid) != IS_SUCCESS){
+			if (verbose_)
+				cout << "- Get an Image mem --> ERROR" << endl;
+		}
+
+		// Copy img in Mat structure
+
+		for (int i = width_ * heigth_ * 3; i--; )
+			x[i] = (uchar) pMemVoid[i];
+
+		if (recON_)
+			outVid_ << frame;
+
 		return frame;
-	
-	// Pointer on matrix
-	uchar* x = frame.ptr();
-
-	// Get Image from camera
-	if ( is_GetImageMem (hCam_, (void**) &pMemVoid) != IS_SUCCESS){
-		if (verbose_)
-			cout << "- Get an Image mem --> ERROR" << endl;
 	}
-
-	// Copy img in Mat structure
-
-	for (int i = width_ * heigth_ * 3; i--; )
-		x[i] = (uchar) pMemVoid[i];
-
-	if (recON_)
-		outVid_ << frame;
-
-	return frame;
-
 }
 
 bool ids_camera::cameraOn(){
@@ -375,7 +402,13 @@ bool ids_camera::cameraOn(){
 	return true;
 }
 
-bool ids_camera::recON(const std::string str){
+bool ids_camera::recON(std::string str){
+
+	if (offline_){
+		if (verbose_)
+			cout << "- Unable to set REC Mode, the offline option is ON " << endl;
+		return false;
+	}
 
 	if (recON_){
 		if (verbose_)
@@ -384,12 +417,27 @@ bool ids_camera::recON(const std::string str){
 		return true;
 	}
 
+	// Check if the file already exist
+
+	int count = 0;
+
+	while (is_file_exist(str.c_str())){
+
+		string str_c;
+		stringstream strstream;
+		strstream << count;
+		strstream >> str_c;
+
+		str += "_" + str_c + ".avi";
+
+	}
+	
 	int ex = static_cast<int>(CV_FOURCC('M', 'P', '4', 'V')); 
 	
 	// Transform from int to char via Bitwise operators
 	char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
 	
-	// Open videostr.c_str()
+	// Open video
 
 	outVid_.open(str.c_str(), ex, 15.0, Size( width_, heigth_ ), true);
 
@@ -410,6 +458,12 @@ bool ids_camera::recOFF(){
 
 }
 
+
+bool ids_camera::is_file_exist(const char *fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
+}
 
 
 void ids_camera::spin(){

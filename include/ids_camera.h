@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <sstream>
+#include <fstream> 
 // OpenCV Lib
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -43,7 +44,7 @@ namespace ids {
 		bool cameraOn();
 
 		// Recording video
-		bool recON(const std::string);
+		bool recON(std::string);
 		bool recOFF();
 
 		// Get current frame
@@ -53,7 +54,10 @@ namespace ids {
 
 		// Init function
 		bool init();
-		
+
+		// Check if the video already exist
+		bool is_file_exist(const char *);
+
 		// terminate on error
 		void terminate_on_error();
 
@@ -69,9 +73,11 @@ namespace ids {
 		int width_, heigth_, bpp_;
 
 		cv::VideoWriter outVid_;
+		cv::VideoCapture* off_video_;
 
 		bool is_terminate_;
 		bool recON_;
+		bool offline_;
 
 		// ROS
 
