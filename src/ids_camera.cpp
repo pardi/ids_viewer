@@ -39,24 +39,28 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 	is_terminate_ = false;
 	recON_ = false;
 
+	// Get namespace
+
+	std::string ns = ros::this_node::getNamespace();
+
 	// Get param
 	std::string rec, off_vid;
 	int hCam;
 
-   	n_->param("/ids/id", hCam, 1);
+   	n_->param(ns + "/ids/id", hCam, 1);
    	hCam_ = (HIDS) hCam_;
 
-	n_->param("/ids/fps", fps_, 15);
-	n_->param("/ids/width", width_, CAM_VIDEO_WIDTH);
-	n_->param("/ids/height", height_, CAM_VIDEO_HEIGHT);
-	n_->param("/ids/bpp", bpp_, CAM_VIDEO_BPP);
-	n_->param("/ids/verbose", verbose_, true);
-	n_->param<std::string>("/ids/rec_name", rec, "");
-	n_->param("/ids/offline", offline_, false);
+	n_->param(ns + "/ids/fps", fps_, 15);
+	n_->param(ns + "/ids/width", width_, CAM_VIDEO_WIDTH);
+	n_->param(ns + "/ids/height", height_, CAM_VIDEO_HEIGHT);
+	n_->param(ns + "/ids/bpp", bpp_, CAM_VIDEO_BPP);
+	n_->param(ns + "/ids/verbose", verbose_, true);
+	n_->param<std::string>(ns +"/ids/rec_name", rec, "");
+	n_->param(ns + "/ids/offline", offline_, false);
 
 	if (offline_){
 
-		n_->param<std::string>("/ids/offline_name", off_vid, "");
+		n_->param<std::string>(ns + "/ids/offline_name", off_vid, "");
 
 		off_video_ = new VideoCapture(off_vid.c_str()); 
 
@@ -88,12 +92,12 @@ ids_camera::ids_camera(ros::NodeHandle* n){
 	
 	// Service
 
-	param_ser_ = n_->advertiseService("ids_viewer/params", &ids_camera::paramService, this);
+	param_ser_ = n_->advertiseService(ns + "/ids_viewer/params", &ids_camera::paramService, this);
 
 
 	// Generate image transport element
   	image_transport::ImageTransport it(*n_);
-  	ids_pub_ = it.advertise("ids_viewer/image", 1);
+  	ids_pub_ = it.advertise(ns + "/ids_viewer/image", 1);
 
 	spin();
 }
@@ -440,8 +444,14 @@ bool ids_camera::recON(std::string str){
 		strstream << count;
 		strstream >> str_c;
 
+		if (count == 0)
+			str.erase(str.end() - 4, str.end());
+		else
+			str.erase(str.end() - str_c.size()  - 1, str.end());
+
 		str += "_" + str_c + ".avi";
 
+		count++;
 	}
 	
 	int ex = static_cast<int>(CV_FOURCC('M', 'P', '4', 'V')); 

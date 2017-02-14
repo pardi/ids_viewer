@@ -6,4 +6,4 @@ ids/bpp: 24
 ids/verbose: true
 ids/rec_name: "/home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec_15fps.avi" # let this field empty to disable the recording, please insert absolute address -- /home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec.avi
 ids/offline: true # when it is set the stream cames from ids/offline_name video, if it exists
-ids/offline_name: "/home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec_15fps_8.avi"
+ids/offline_name: "/home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec_15fps_6.avi"
