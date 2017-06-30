@@ -132,7 +132,7 @@ LINK_DIRECTORIES(/usr/lib)
 # add_dependencies(mark_follower ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(ids_viewer_node src/main.cpp src/ids_camera.cpp)
+add_executable(ids_viewer_node src/main.cpp src/ids_node.cpp src/ids_class.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

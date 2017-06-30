@@ -4,6 +4,6 @@
 
     	<rosparam command="load" file="$(arg yamlFile)"/>
 
-	<node name="ids_viewer_node" pkg="ids_viewer" type="ids_viewer_node" respawn="true" output="screen" />
+	<node name="ids_viewer_node" pkg="ids_viewer" type="ids_viewer_node" respawn="false" output="screen" />
     
 </launch>

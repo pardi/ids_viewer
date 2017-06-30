@@ -1,9 +1,14 @@
-ids/camera_id: 1
-ids/fps: 15 # IDS-XS reaches at maximum 15 FPS
-ids/width: 640
-ids/heigth: 480
-ids/bpp: 24
-ids/verbose: true
-ids/rec_name: "/home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec_15fps.avi" # let this field empty to disable the recording, please insert absolute address -- /home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec.avi
-ids/offline: true # when it is set the stream cames from ids/offline_name video, if it exists
-ids/offline_name: "/home/solaris/catkin_ws/src/ids_viewer/rec/ids_viewer_rec_15fps_8.avi"
+ids_node/camera_id: 1
+ids_node/fps: 30.0
+ids_node/profile: 32
+ids_node/autofocus: false
+ids_node/verbose: true
+ids_node/compression: 2
+ids_node/pixelClock: 9
+ids_node/autofocus: true
+ids_node/displayMode: 1
+ids_node/exposure: 5 # number of step from the bottom -- exposureValue = min_exp + exposure * inc_exp
+ids_node/recName: "/home/solaris/calibIDS.avi" # let this field empty to disable the recording, please insert absolute address -- /home/solaris/catkin_ws/src/ids_node_viewer/rec/ids_node_viewer_rec.avi
+ids_node/offline: false # when it is set the stream cames from ids_node/offline_name video, if it exists
+ids_node/offlineName: "/home/solaris/catkin_ws/src/ids_viewer/rec/vidcockpit.avi"
+  

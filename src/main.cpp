@@ -1,6 +1,4 @@
-#include <ids_camera.h>
-
-using namespace ids;
+#include <ids_node.h>
 
 int main(int argc, char** argv){
 
@@ -10,7 +8,7 @@ int main(int argc, char** argv){
 
    	ROS_INFO("Start IDS XS camera node");
 
-	ids::ids_camera ids_XS(&n);
+	ids_node ueye_XS(&n);
 
 	return 0;
 }
